@@ -55,7 +55,7 @@ const GUIDES = [
   },
 ];
 
-const CATEGORIES = [...new Set(GUIDES.map(g => g.category))];
+const CATEGORIES = Array.from(new Set(GUIDES.map(g => g.category)));
 
 export default function GuidesPage() {
   return (

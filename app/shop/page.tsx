@@ -241,10 +241,16 @@ function ShopResults({ searchParams }: { searchParams: ReturnType<typeof useSear
         {/* Products grid */}
         <main className="lg:col-span-9">
           {result.products.length === 0 ? (
-            <div className="bg-white border border-zinc-200 rounded-2xl p-16 text-center space-y-4">
+            <div className="bg-white border border-zinc-200 rounded-2xl px-5 py-12 sm:p-16 text-center space-y-4">
               <Sliders className="w-10 h-10 text-zinc-700 mx-auto" />
               <h3 className="text-xl font-bold text-zinc-950 font-heading">No parts found</h3>
-              <p className="text-zinc-600 text-sm">Try adjusting your filters or search query.</p>
+              <p className="text-zinc-600 text-sm text-center mx-auto">Try adjusting your filters or ask about sourcing the part for your build.</p>
+              <Link
+                href={`/workshop?service=build-planning${engine === 'all' ? '' : `&engine=${encodeURIComponent(engine)}`}#quote`}
+                className="button-bright inline-flex rounded-xl px-4 py-2.5 text-sm font-bold transition-colors"
+              >
+                Ask about parts sourcing
+              </Link>
             </div>
           ) : (
             <>

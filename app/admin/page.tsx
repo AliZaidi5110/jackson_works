@@ -10,7 +10,7 @@ import {
   Plus, Search, Filter, Edit2, Trash2, Eye, Copy, Download,
   Upload, ChevronDown, ChevronRight, Check, X, Star, Wrench,
   Truck, ShieldCheck, FileText, Bell, LogOut, Menu, Layers,
-  Cpu, Archive, Tag, Globe, Image, DollarSign, Activity,
+  Cpu, Archive, Tag, Globe, Image as ImageIcon, DollarSign, Activity,
   Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw,
   ArrowUpRight, ArrowDownRight, Gauge, Zap,
 } from 'lucide-react';
@@ -608,7 +608,7 @@ function AddProductModal({ onClose }: { onClose: () => void }) {
           {tab === 'images' && (
             <div className="space-y-5">
               <div className="border-2 border-dashed border-zinc-700 hover:border-red-600 rounded-2xl p-10 text-center cursor-pointer transition-colors">
-                <Image className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+                <ImageIcon className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
                 <p className="text-zinc-300 font-bold text-sm">Drag & drop images here</p>
                 <p className="text-zinc-600 text-xs mt-1">PNG, JPG, WebP up to 10 MB each. Auto-compressed to WebP.</p>
                 <button className="mt-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-5 py-2 rounded-xl text-xs font-bold transition-colors">
@@ -934,7 +934,7 @@ function ContentTab() {
         {[
           { title: 'Homepage Banners', desc: 'Edit the hero carousel slides and promo strip text.', icon: Globe, status: '3 slides' },
           { title: 'Blog & Guides', desc: 'Technical articles, engine swap guides and buying tips.', icon: FileText, status: '5 posts' },
-          { title: 'Projects Gallery', desc: 'Customer builds and workshop project images.', icon: Image, status: '8 projects' },
+          { title: 'Projects Gallery', desc: 'Customer builds and workshop project images.', icon: ImageIcon, status: '8 projects' },
           { title: 'Google Reviews', desc: 'Manage which reviews appear on the homepage.', icon: Star, status: 'TODO: connect API' },
           { title: 'FAQ', desc: 'Edit frequently asked questions shown on the homepage.', icon: MessageSquare, status: '12 questions' },
           { title: 'Workshop Services', desc: 'Edit service pages, pricing guidance and process steps.', icon: Wrench, status: '8 services' },

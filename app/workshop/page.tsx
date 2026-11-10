@@ -1,245 +1,300 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
-  Wrench, Gauge, Zap, Cpu, Settings, Layers, Phone,
-  Mail, ArrowRight, CheckCircle, Clock, ShieldCheck,
-  Star, ChevronRight, Upload,
+  ArrowRight, Car, CircleDot, ClipboardList, Cpu, Droplets, Gauge,
+  GitBranch, Layers, Settings, Wrench, Zap,
 } from 'lucide-react';
+import { ENGINES, PRIORITY_ENGINES, getEngineByCode } from '@/lib/jdm-catalog';
 
-const SERVICES = [
+const SERVICE_GROUPS = [
   {
-    id: 'engine-swaps',
-    icon: Wrench,
-    title: 'Engine Swaps',
-    price: 'Quote required',
-    desc: 'Full JDM engine swaps for Toyota, Nissan, Mitsubishi, Honda, Mazda and Subaru platforms. We handle everything from removal to installation, wiring, cooling and first start.',
-    steps: ['Vehicle inspection and assessment', 'Engine removal and bay preparation', 'New engine installation and alignment', 'Wiring, cooling and fuel system connection', 'Fluids, start-up and road test'],
+    id: 'engine-services',
+    title: 'Engine builds & management',
+    services: [
+      {
+        id: 'build-planning',
+        icon: ClipboardList,
+        title: 'Build Planning & Parts Sourcing',
+        description: 'Put together a parts list around your engine variant, chassis, power target and budget.',
+        topics: ['OEM and aftermarket parts', 'Fitment and parts-list checks', 'Parts-only or supply-and-fit quotes'],
+      },
+      {
+        id: 'engine-swaps',
+        icon: Wrench,
+        title: 'Engine Swaps',
+        description: 'Discuss a 2JZ, RB25 or RB26 conversion, from engine sourcing through to the first start.',
+        topics: ['Engine and gearbox packages', 'Mounts and clearance', 'Wiring, fuel and cooling integration'],
+      },
+      {
+        id: 'engine-rebuilds',
+        icon: Settings,
+        title: 'Rebuilds, Forged Engines & Stroker Kits',
+        description: 'Scope an OEM-spec refresh, a forged performance build or a stroker build for your intended use.',
+        topics: ['Forged pistons and conrods', 'Crankshafts, bearings and fasteners', 'Camshafts, valvetrain and machining requirements'],
+      },
+      {
+        id: 'supporting-systems',
+        icon: Droplets,
+        title: 'Fuel, Oiling & Cooling Upgrades',
+        description: 'Plan supporting upgrades around the engine, turbo and how the car will be used.',
+        topics: ['Injectors, pumps and regulators', 'Oil pumps, oil coolers and catch cans', 'Radiators, hoses and fans'],
+      },
+      {
+        id: 'ecu-tuning',
+        icon: Zap,
+        title: 'ECU, Wiring & Dyno Tuning',
+        description: 'Enquire about engine management, wiring and calibration for your combination.',
+        topics: ['Standalone ECUs and conversion looms', 'Sensors, ignition and data logging', 'Mapping and dyno requirements'],
+      },
+      {
+        id: 'diagnostics',
+        icon: Settings,
+        title: 'Diagnostics & Servicing',
+        description: 'Describe running faults or request a health check before committing to an upgrade.',
+        topics: ['Fault finding', 'Compression and leak-down testing', 'Servicing and inspection'],
+      },
+    ],
   },
   {
-    id: 'engine-rebuilds',
-    icon: Settings,
-    title: 'Engine Rebuilds',
-    price: 'Quote required',
-    desc: 'Complete engine strip, inspection, machining and rebuild using OEM or performance components. All builds compression tested and documented.',
-    steps: ['Full strip-down and inspection', 'Block boring, honing and machining', 'New gaskets, bearings, seals and rings', 'Assembly with torque specifications', 'Compression test and break-in'],
+    id: 'fabrication-services',
+    title: 'Turbo systems & fabrication',
+    services: [
+      {
+        id: 'turbo-installation',
+        icon: Gauge,
+        title: 'Turbo Installation & Boost Control',
+        description: 'Check the complete turbo package against your engine, chassis and power target.',
+        topics: ['Single-turbo conversions and manifolds', 'Wastegates, actuators and boost controllers', 'Intercoolers, blow-off valves and oil or coolant lines'],
+      },
+      {
+        id: 'custom-fabrication',
+        icon: Layers,
+        title: 'Custom Manifolds, Exhausts & Fabrication',
+        description: 'Discuss bespoke parts when an off-the-shelf system does not suit the build.',
+        topics: ['Manifold, flange and wastegate clearance', 'Downpipes and exhaust systems', 'Charge pipes, mounts and brackets'],
+      },
+    ],
   },
   {
-    id: 'turbo-installation',
-    icon: Gauge,
-    title: 'Turbo Installation',
-    price: 'Quote required',
-    desc: 'Single-turbo conversions, turbo upgrades, manifold fitting, oil and water line installation, intercooler and charge pipe routing.',
-    steps: ['Existing turbo removal (if applicable)', 'Manifold and turbo fitting', 'Oil and water line installation', 'Intercooler and piping setup', 'Boost leak test and check'],
-  },
-  {
-    id: 'ecu-tuning',
-    icon: Zap,
-    title: 'ECU Tuning & Dyno',
-    price: 'Quote required',
-    desc: 'Standalone ECU installation, wiring and mapping on our in-house dyno. Haltech, Link, AEM and OEM ECU tuning for Japanese engines.',
-    steps: ['ECU installation and wiring', 'Sensor calibration', 'Base map and idle setup', 'Dyno tuning (power runs)', 'Final health check and report'],
-  },
-  {
-    id: 'tcu-gearbox',
-    icon: Cpu,
-    title: 'TCU & Gearbox Fitting',
-    price: 'Quote required',
-    desc: 'Gearbox conversions, TCU installation and calibration, clutch and flywheel fitting, driveshaft modification and prop balancing.',
-    steps: ['Gearbox removal and inspection', 'New gearbox or conversion kit fitting', 'TCU wiring and calibration', 'Clutch and flywheel installation', 'Road test and quality check'],
-  },
-  {
-    id: 'diagnostics',
-    icon: Settings,
-    title: 'Diagnostics & Servicing',
-    price: 'Quote required',
-    desc: 'Full engine diagnostics, fault finding, compression testing, oil analysis and scheduled servicing for Japanese performance vehicles.',
-    steps: ['OBD scan and fault code read', 'Visual and auditory inspection', 'Compression and leak-down test', 'Fault diagnosis and report', 'Repair recommendation and quote'],
-  },
-  {
-    id: 'custom-fabrication',
-    icon: Layers,
-    title: 'Custom Fabrication',
-    price: 'Quote required',
-    desc: 'Bespoke exhaust fabrication, intercooler piping, engine mounts, brackets, turbo manifolds and one-off parts made to specification.',
-    steps: ['Design and measurement', 'Material selection (stainless, mild steel, aluminium)', 'TIG/MIG welding and fabrication', 'Test fit and adjustment', 'Finishing and installation'],
+    id: 'chassis-services',
+    title: 'Drivetrain, chassis & fitment',
+    services: [
+      {
+        id: 'tcu-gearbox',
+        icon: Cpu,
+        title: 'Gearbox, TCU & Drivetrain Fitting',
+        description: 'Plan a manual conversion, automatic controller upgrade or driveline setup.',
+        topics: ['Gearbox kits and TCU calibration', 'Clutches and lightweight flywheels', 'Limited-slip differentials, propshafts and axles'],
+      },
+      {
+        id: 'suspension-steering',
+        icon: GitBranch,
+        title: 'Suspension & Steering Setup',
+        description: 'Discuss suspension and steering options for road, track or drift use.',
+        topics: ['Coilovers, dampers and springs', 'Adjustable arms, bushes and bracing', 'Steering-angle kits and alignment requirements'],
+      },
+      {
+        id: 'wheel-fitment',
+        icon: CircleDot,
+        title: 'Wheel & Tyre Fitment',
+        description: 'Check wheel and tyre sizing against your chassis, brakes and intended use.',
+        topics: ['Width, offset and bolt pattern', 'Tyres, spacers and hardware', 'Arch, suspension and brake clearance'],
+      },
+      {
+        id: 'track-preparation',
+        icon: Car,
+        title: 'Brakes & Motorsport Preparation',
+        description: 'Ask about braking, cockpit and lighting parts for your build.',
+        topics: ['Brake packages and hydraulic handbrakes', 'Seat mounts, harnesses and steering controls', 'Headlights, tail lights and fitment checks'],
+      },
+    ],
   },
 ];
 
+const fieldClass = 'w-full rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-950 placeholder-zinc-500 focus:border-red-600';
+const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-600';
+
+function WorkshopContent() {
+  const params = useSearchParams();
+  const initialEngine = getEngineByCode((params.get('engine') ?? '').toUpperCase())?.code ?? '';
+  const initialService = SERVICE_GROUPS.flatMap(group => group.services).find(item => item.id === params.get('service'))?.title ?? '';
+  return <Workshop key={`${initialEngine}:${initialService}`} initialEngine={initialEngine} initialService={initialService} />;
+}
+
 export default function WorkshopPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-16 text-zinc-600">Loading workshop services…</div>}>
+      <WorkshopContent />
+    </Suspense>
+  );
+}
+
+function Workshop({ initialEngine, initialService }: { initialEngine: string; initialService: string }) {
+  const [engine, setEngine] = useState(initialEngine);
+  const [service, setService] = useState(initialService);
   const [sending, setSending] = useState(false);
   const [formMessage, setFormMessage] = useState('');
-  const submitQuote = async (event: React.FormEvent<HTMLFormElement>) => {
+
+  async function submitQuote(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const details = Object.fromEntries(new FormData(form).entries());
     setSending(true);
     setFormMessage('');
-    const form = event.currentTarget;
     try {
-      const response = await fetch('/api/enquiries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form).entries())) });
+      const response = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(details),
+      });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Quote request could not be sent.');
       form.reset();
+      setEngine(initialEngine);
+      setService(initialService);
       setFormMessage('Thanks — your quote request has been sent.');
     } catch (error) {
       setFormMessage(error instanceof Error ? error.message : 'Quote request could not be sent.');
-    } finally { setSending(false); }
-  };
-
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
-    <div className="space-y-0">
-      {/* Hero */}
-      <section className="relative min-h-[400px] bg-zinc-950 flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          {/* TODO: Replace with real workshop photography */}
-          <img
-            src="https://images.unsplash.com/photo-1558981359-219d6364c9c8?auto=format&fit=crop&w=1600&q=80"
-            alt="JDM Engine Workshop"
-            className="w-full h-full object-cover opacity-20"
-          />
-          <div className="hero-overlay absolute inset-0" />
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-6">
-          <div className="inline-flex items-center gap-2 bg-red-950/60 border border-red-800/50 px-3.5 py-1.5 rounded-full text-red-300 text-xs font-bold">
-            <Wrench className="w-3.5 h-3.5" />
-            Our Workshop
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-white font-heading leading-tight">
-            Workshop<br />
-            <span className="text-gradient-warm">Services.</span>
-          </h1>
-          <p className="text-zinc-400 max-w-2xl leading-relaxed">
-            We supply and fit. Our specialists carry out full engine swaps, rebuilds, gearbox conversions, turbo installations, ECU mapping and diagnostics. Experienced with 2JZ, RB26, RB25, SR20, 4G63 and more.
+    <>
+      <section className="relative overflow-hidden bg-zinc-950 text-white">
+        <div className="hero-overlay absolute inset-0" />
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-cyan-200">Jackson Works Workshop</p>
+          <h1>Workshop <span className="text-gradient-warm">Services</span></h1>
+          <p className="mt-4 max-w-2xl text-zinc-200">
+            Plan a Toyota 2JZ, Nissan RB25 or Nissan RB26 build. Ask about engine rebuilds and swaps, turbo fabrication,
+            drivetrain conversions or setting up the chassis around your power goals.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <a href="#quote" className="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
-              Get a Quote <ArrowRight className="w-4 h-4" />
-            </a>
-            <a href="/contact" className="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
-              <Phone className="w-4 h-4 text-red-500" /> Contact Details
-            </a>
-          </div>
+          <a href="#quote" className="button-bright mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-colors">
+            Request a quote <ArrowRight className="h-4 w-4" />
+          </a>
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section className="py-16 bg-zinc-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <p className="text-red-700 text-xs font-black uppercase tracking-widest mb-2">What we do</p>
-            <h2 className="text-3xl font-black text-zinc-950 font-heading">Our Services</h2>
-            <p className="text-zinc-600 text-sm mt-2 max-w-xl mx-auto">
-              From engine swaps to custom fabrication, we handle every aspect of your JDM build.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICES.map(service => {
-              const Icon = service.icon;
-              const isOpen = selectedService === service.id;
-              return (
-                <div
-                  key={service.id}
-                  className={`bg-white border rounded-2xl p-6 transition-all cursor-pointer ${isOpen ? 'border-red-600 shadow-lg shadow-red-200/50' : 'border-zinc-200 hover:border-zinc-400'}`}
-                  onClick={() => setSelectedService(isOpen ? null : service.id)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
-                      <Icon className="w-6 h-6 text-red-700" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-black text-zinc-950 text-base font-heading">{service.title}</h3>
-                      <p className="text-red-700 text-sm font-bold mt-1">{service.price}</p>
-                    </div>
-                  </div>
-                  <p className="text-zinc-600 text-sm leading-relaxed mt-4">{service.desc}</p>
-
-                  {isOpen && (
-                    <div className="mt-5 pt-5 border-t border-zinc-200 space-y-2 animate-fadeIn">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-3">Process</p>
-                      {service.steps.map((step, i) => (
-                        <div key={i} className="flex items-start gap-3 text-sm">
-                          <span className="text-red-700 font-black text-xs mt-0.5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                          <span className="text-zinc-700">{step}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+      <section aria-labelledby="workshop-platforms" className="border-b border-zinc-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+          <h2 id="workshop-platforms">Start with your engine</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {PRIORITY_ENGINES.map(({ label, code, variants }) => (
+              <article key={code} className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+                <h3 className="text-zinc-950">{label}</h3>
+                <p className="text-xs text-zinc-600">{variants}</p>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm font-bold">
+                  <Link href={`/shop?engine=${encodeURIComponent(code)}`} className="text-zinc-700 hover:underline">Browse parts</Link>
+                  <a href="#quote" onClick={() => setEngine(code)} className="text-red-700 hover:underline">Request a quote</a>
                 </div>
-              );
-            })}
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Quote Request Form */}
-      <section id="quote" className="py-16 bg-zinc-100 border-t border-zinc-200">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
-            <p className="text-red-700 text-xs font-black uppercase tracking-widest mb-2">Get started</p>
-            <h2 className="text-3xl font-black text-zinc-950 font-heading">Request a Quote</h2>
-            <p className="text-zinc-600 text-sm mt-2">Quote request form concept. Enquiry handling and response times need business confirmation.</p>
-          </div>
+      <section aria-labelledby="workshop-services" className="mx-auto max-w-7xl space-y-9 px-4 py-10 sm:px-6 sm:py-14">
+        <div>
+          <h2 id="workshop-services">Explore services</h2>
+          <p className="mt-2 text-sm text-zinc-600">
+            Choose a service to start an enquiry. Fitment, parts availability and workshop scope are confirmed when quoting.
+          </p>
+          <nav aria-label="Workshop service groups" className="mt-4 flex flex-wrap gap-2">
+            {SERVICE_GROUPS.map(group => (
+              <a key={group.id} href={`#${group.id}`} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-bold hover:border-amber-400">{group.title}</a>
+            ))}
+          </nav>
+        </div>
 
-          <form onSubmit={submitQuote} className="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Your Name *</label>
-                <input name="name" required type="text" placeholder="John Smith" className="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3 text-sm text-zinc-950 placeholder-zinc-500 focus:outline-none focus:border-red-600 transition-colors" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Phone *</label>
-                <input name="phone" required type="tel" placeholder="07xxx xxx xxx" className="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3 text-sm text-zinc-950 placeholder-zinc-500 focus:outline-none focus:border-red-600 transition-colors" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Email *</label>
-                <input name="email" required type="email" placeholder="you@example.co.uk" className="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3 text-sm text-zinc-950 placeholder-zinc-500 focus:outline-none focus:border-red-600 transition-colors" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Vehicle Reg (optional)</label>
-                <input name="registration" type="text" placeholder="AB12 CDE" className="uk-plate-input w-full py-2.5 px-3 text-sm text-center focus:outline-none" />
-              </div>
+        {SERVICE_GROUPS.map(group => (
+          <section key={group.id} id={group.id} className="scroll-mt-36" aria-labelledby={`${group.id}-title`}>
+            <h3 id={`${group.id}-title`} className="mb-4">{group.title}</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {group.services.map(({ id, icon: Icon, title, description, topics }) => (
+                <article key={id} className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-5">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-900">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <h4>{title}</h4>
+                  </div>
+                  <p className="text-sm text-zinc-600">{description}</p>
+                  <ul className="ml-4 list-disc space-y-1 text-xs text-zinc-700">
+                    {topics.map(topic => <li key={topic}>{topic}</li>)}
+                  </ul>
+                  <a href="#quote" onClick={() => setService(title)} aria-label={`Request a quote for ${title}`} className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-bold text-red-700 hover:underline">
+                    Request a quote <ArrowRight className="h-4 w-4" />
+                  </a>
+                </article>
+              ))}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Vehicle / Chassis</label>
-                <input name="vehicle" type="text" placeholder="e.g. Supra A80, Skyline R34" className="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3 text-sm text-zinc-950 placeholder-zinc-500 focus:outline-none focus:border-red-600 transition-colors" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Engine Code</label>
-                <input name="engine" type="text" placeholder="e.g. 2JZ-GTE, RB26DETT" className="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3 text-sm text-zinc-950 placeholder-zinc-500 focus:outline-none focus:border-red-600 transition-colors font-mono" />
-              </div>
+          </section>
+        ))}
+      </section>
+
+      <section id="quote" className="scroll-mt-36 border-t border-zinc-200 bg-zinc-100 py-12 sm:py-16" aria-labelledby="quote-title">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 id="quote-title">Request a Quote</h2>
+          <p className="mb-6 mt-2 text-sm text-zinc-600">Tell us your chassis, exact engine variant and plans for the car so we can check what fits.</p>
+          <form onSubmit={submitQuote} className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label>
+                <span className={labelClass}>Your Name *</span>
+                <input name="name" required type="text" autoComplete="name" className={fieldClass} />
+              </label>
+              <label>
+                <span className={labelClass}>Phone *</span>
+                <input name="phone" required type="tel" autoComplete="tel" className={fieldClass} />
+              </label>
+              <label>
+                <span className={labelClass}>Email *</span>
+                <input name="email" required type="email" autoComplete="email" className={fieldClass} />
+              </label>
+              <label>
+                <span className={labelClass}>Vehicle registration (optional)</span>
+                <input name="registration" type="text" placeholder="AB12 CDE" className={fieldClass} />
+              </label>
+              <label>
+                <span className={labelClass}>Vehicle / Chassis</span>
+                <input name="vehicle" type="text" placeholder="e.g. Supra A80, Skyline R34" className={fieldClass} />
+              </label>
+              <label>
+                <span className={labelClass}>Engine Code</span>
+                <input name="engine" type="text" list="workshop-engine-codes" value={engine} onChange={event => setEngine(event.target.value)} placeholder="e.g. RB25DET NEO" className={fieldClass} />
+                <datalist id="workshop-engine-codes">
+                  {ENGINES.map(item => <option key={item.code} value={item.code} />)}
+                  <option value="RB25DET NEO" />
+                </datalist>
+              </label>
             </div>
-            <div>
-              <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Service Required *</label>
-              <select name="service" required className="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3 text-sm text-zinc-950 focus:outline-none focus:border-red-600 transition-colors">
+            <label className="block">
+              <span className={labelClass}>Service Required *</span>
+              <select name="service" required value={service} onChange={event => setService(event.target.value)} className={fieldClass}>
                 <option value="">Select a service</option>
-                {SERVICES.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
-                <option value="other">Other / Not Sure</option>
+                {SERVICE_GROUPS.map(group => (
+                  <optgroup key={group.id} label={group.title}>
+                    {group.services.map(item => <option key={item.id} value={item.title}>{item.title}</option>)}
+                  </optgroup>
+                ))}
+                <option value="Other / Not Sure">Other / Not Sure</option>
               </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Details *</label>
-              <textarea name="message" required rows={4} placeholder="Describe the work you need – be as specific as possible…" className="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3 text-sm text-zinc-950 placeholder-zinc-500 focus:outline-none focus:border-red-600 transition-colors resize-none" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Photos (optional)</label>
-              <div className="border-2 border-dashed border-zinc-300 rounded-xl py-8 text-center text-zinc-600 text-sm">
-                <Upload className="w-6 h-6 mx-auto mb-2 text-zinc-600" />
-                <p>Photo uploads will be available when file storage is configured.</p>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-600">Quote requests are emailed to the business contact configured for this site.</p>
+            </label>
+            <label className="block">
+              <span className={labelClass}>Details *</span>
+              <textarea name="message" required rows={4} maxLength={5000} placeholder="Tell us about the parts or work you need, any existing modifications and how you use the car." className={fieldClass} />
+            </label>
             {formMessage && <p role="status" className={`text-sm ${formMessage.startsWith('Thanks') ? 'text-green-700' : 'text-amber-700'}`}>{formMessage}</p>}
-            <button disabled={sending} className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-200 disabled:text-zinc-600 text-white font-black py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-200/50">
-              {sending ? 'Sending…' : 'Submit Quote Request'} <ArrowRight className="w-4 h-4" />
+            <button disabled={sending} className="button-bright flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-colors disabled:opacity-60">
+              {sending ? 'Sending…' : 'Submit Quote Request'} <ArrowRight className="h-4 w-4" />
             </button>
-            <p className="text-zinc-600 text-[11px] text-center">TODO: Confirm contact details and response times.</p>
           </form>
         </div>
       </section>
-    </div>
+    </>
   );
 }

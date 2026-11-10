@@ -5,7 +5,7 @@ import { formatGBP } from '@/lib/format';
 import Link from 'next/link';
 import { useApp } from '@/lib/jdm-context';
 import {
-  MAKES, ENGINES, PART_CATEGORIES, SAMPLE_PRODUCTS,
+  MAKES, ENGINES, PRIORITY_ENGINES, PART_CATEGORIES, SAMPLE_PRODUCTS,
   ENGINE_PACKAGES, getFeaturedPackages, queryJdmProducts,
   calculateDeposit,
 } from '@/lib/jdm-catalog';
@@ -544,18 +544,17 @@ export default function HomePage() {
                   Our Workshop
                 </div>
                 <h2 className="text-3xl lg:text-4xl font-black text-zinc-950 font-heading leading-tight">
-                  Engine Swaps,<br />Rebuilds & Tuning
+                  Engine Builds &amp; Performance Setup
                 </h2>
                 <p className="text-zinc-600 leading-relaxed">
-                  {/* TODO: Replace with real workshop description */}
-                  We supply and fit. Our specialists carry out full engine swaps, rebuilds, gearbox conversions, turbo installations, ECU mapping and diagnostics. Book your vehicle in for a quote.
+                  Planning a 2JZ, RB25 or RB26 build? Enquire about parts sourcing, engine work, custom turbo and exhaust fabrication, or chassis setup for your car.
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { icon: Wrench, label: 'Engine Swaps' },
-                    { icon: Gauge,  label: 'Turbo Installation' },
-                    { icon: Zap,    label: 'ECU Tuning & Dyno' },
-                    { icon: Cpu,    label: 'TCU & Gearbox Fitting' },
+                    { icon: Wrench, label: 'Forged Builds & Swaps' },
+                    { icon: Gauge,  label: 'Turbo & Exhaust Fabrication' },
+                    { icon: Zap,    label: 'ECU & Drivetrain Setup' },
+                    { icon: Settings2, label: 'Suspension & Wheel Fitment' },
                   ].map(({ icon: Icon, label }) => (
                     <div key={label} className="flex items-center gap-2 text-sm text-zinc-700">
                       <Icon className="w-4 h-4 text-red-700 shrink-0" />
@@ -563,7 +562,7 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Link
                     href="/workshop"
                     className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all"
@@ -571,20 +570,23 @@ export default function HomePage() {
                     View Services
                   </Link>
                   <Link
-                    href="/contact"
+                    href="/workshop#quote"
                     className="flex items-center gap-2 border border-zinc-300 hover:border-zinc-500 text-zinc-700 hover:text-zinc-950 px-6 py-3 rounded-xl font-bold text-sm transition-all"
                   >
                     Get a Quote
                   </Link>
                 </div>
               </div>
-              {/* TODO: Replace with workshop photo */}
-              <div className="hidden lg:block rounded-2xl overflow-hidden border border-zinc-200 aspect-[4/3]">
-                <img
-                  src="https://images.unsplash.com/photo-1558981359-219d6364c9c8?auto=format&fit=crop&w=800&q=80"
-                  alt="JDM Engine Workshop"
-                  className="w-full h-full object-cover opacity-60"
-                />
+              <div className="space-y-3">
+                {PRIORITY_ENGINES.map(({ label, code, variants }) => (
+                  <Link key={code} href={`/engine/${code.toLowerCase()}`} className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-4 hover:border-amber-400">
+                    <span className="flex flex-col gap-1">
+                      <span className="font-bold text-zinc-950">{label}</span>
+                      <span className="text-xs text-zinc-600">{variants}</span>
+                    </span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-red-700" />
+                  </Link>
+                ))}
               </div>
             </div>
           </div>

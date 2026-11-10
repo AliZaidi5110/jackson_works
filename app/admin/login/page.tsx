@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { LockKeyhole, ShieldCheck } from 'lucide-react';
 
 export default function AdminLoginPage() {
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -19,7 +17,7 @@ export default function AdminLoginPage() {
       const response = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, code }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Sign-in failed.');
-      const requested = searchParams.get('next');
+      const requested = new URLSearchParams(window.location.search).get('next');
       const next = requested?.startsWith('/admin') && requested !== '/admin/login' ? requested : '/admin';
       window.location.assign(next);
     } catch (submitError) {

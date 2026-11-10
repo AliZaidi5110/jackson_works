@@ -183,6 +183,12 @@ export const MAKES: Make[] = [
 // ENGINES
 // ─────────────────────────────────────────────
 
+export const PRIORITY_ENGINES = [
+  { label: 'Toyota 2JZ', code: '2JZ-GTE', variants: '2JZ-GTE / 2JZ-GE' },
+  { label: 'Nissan RB25', code: 'RB25DET', variants: 'RB25DET / RB25DET NEO' },
+  { label: 'Nissan RB26', code: 'RB26DETT', variants: 'RB26DETT' },
+];
+
 export const ENGINES: Engine[] = [
   {
     code: '2JZ-GTE',
@@ -593,7 +599,6 @@ export const SAMPLE_PRODUCTS: JdmProduct[] = [
     description: 'Direct JDM import Toyota 2JZ-GTE complete engine unit. Recorded mileage of 62,000 km. Compression tested before dispatch. Supplied with timing cover, alternator and air conditioning compressor brackets. Suitable for JZA80 Supra, JZZ30/31 Soarer, JZX100 Chaser and compatible swap applications. **TODO: Insert compression test results and import documentation.**',
     seoTitle: '2JZ-GTE Used JDM Engine for Sale UK | From £2,999 Inc. VAT',
     seoDescription: 'Buy a used JDM Toyota 2JZ-GTE engine in the UK. Low-mileage import, compression tested, 3-month warranty. Supra, Soarer and Chaser fitment. 10% deposit secures.',
-    isFeatured: true,
   },
   {
     id: 1002,

@@ -121,6 +121,9 @@ export default function EngineLandingPage() {
               <span><strong className="text-white">{engine.torque}</strong></span>
               <span>{engine.induction}</span>
             </div>
+            <Link href={`/workshop?engine=${encodeURIComponent(engine.code)}#quote`} className="button-bright inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-colors">
+              Request a build quote for {engine.code} <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
