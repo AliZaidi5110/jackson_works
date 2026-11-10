@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APEX Auto Parts UK | Quality Genuine & OEM Car Spare Parts</title>
+  <meta name="description" content="Shop over 10,000 genuine and OEM car spare parts, accessories, brake discs, oil filters, spark plugs and batteries. Next day UK delivery & instant vehicle lookup by registration.">
+  <meta name="keywords" content="car parts UK, auto spare parts, brake pads BMW, oil filter Ford, Bosch auto parts, vehicle reg finder, car accessories UK">
+  <meta name="theme-color" content="#0f172a">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="APEX Auto Parts UK | Premium Automotive Spare Parts">
+  <meta property="og:description" content="Find the exact right fit for your vehicle with 10,000+ car parts, next-day UK delivery, and guaranteed compatibility.">
+  <meta property="og:url" content="https://apexautoparts.co.uk">
+  <meta property="og:image" content="./images/apex_hero_banner.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Charles+Marx&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Main Stylesheet (Relative path for dual HTTP / File support) -->
+  <link rel="stylesheet" href="./css/styles.css">
+
+  <!-- JSON-LD SEO Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AutoPartsStore",
+    "name": "APEX Auto Parts UK",
+    "image": "https://apexautoparts.co.uk/images/apex_hero_banner.jpg",
+    "@id": "https://apexautoparts.co.uk",
+    "url": "https://apexautoparts.co.uk",
+    "telephone": "+44 800 892 4000",
+    "priceRange": "££",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Unit 4 Apex Automotive Logistics Park, Park Royal",
+      "addressLocality": "London",
+      "postalCode": "NW10 7XQ",
+      "addressCountry": "GB"
+    }
+  }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- Application Mount Node -->
+  <div id="app"></div>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-20 right-4 z-50 flex flex-col gap-3 max-w-sm pointer-events-none"></div>
+
+  <!-- Scripts (Relative paths for instant local file and HTTP server loading) -->
+  <script src="./js/data/vrm_database.js"></script>
+  <script src="./js/data/catalog.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

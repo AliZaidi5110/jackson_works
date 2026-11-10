@@ -1,0 +1,153 @@
+// prisma/schema.prisma – Data model for the JDM engine e‑commerce platform
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+ datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+ }
+
+ // ──────────────────────────────────────
+ // Users & authentication
+ // ──────────────────────────────────────
+ model User {
+   id            String   @id @default(cuid())
+   email         String   @unique
+   passwordHash  String
+   role          Role     @default(CUSTOMER)
+   totpSecret    String?  // for 2FA (Owner/Staff)
+   createdAt     DateTime @default(now())
+   updatedAt     DateTime @updatedAt
+   orders        Order[]
+   // relation for admin activity log could be added later
+ }
+
+enum Role {
+   OWNER
+   STAFF
+   CUSTOMER
+ }
+
+ // ──────────────────────────────────────
+ // Product catalogue
+ // ──────────────────────────────────────
+ model Category {
+   id          String   @id @default(cuid())
+   name        String
+   slug        String   @unique
+   parentId    String?  // for mega‑menu hierarchy
+   parent      Category? @relation("CategoryChildren", fields: [parentId], references: [id])
+   children    Category[] @relation("CategoryChildren")
+   products    Product[]
+ }
+ 
+ model Engine {
+   id          String   @id @default(cuid())
+   make        String   // e.g. Toyota, Nissan
+   code        String   // e.g. 2JZ‑GTE
+   name        String   // friendly name
+   slug        String   @unique
+   description String?
+   products    Product[]
+ }
+ 
+ model Product {
+   id               String    @id @default(cuid())
+   title            String
+   slug             String    @unique
+   description      String?
+   sku              String    @unique
+   condition        Condition
+   price            Decimal   @db.Decimal(10,2)
+   vatIncluded      Boolean   @default(true)
+   stock            Int       @default(0)
+   images           Image[]
+   categories       Category[] @relation(references: [id])
+   engine           Engine?   @relation(fields: [engineId], references: [id])
+   engineId         String?
+   // optional fields for used engines
+   mileage          Int?      // miles on used JDM units
+   compressionTest  String?
+   warrantyMonths   Int?
+   // for bundles (engine packages, gearbox kits)
+   isBundle         Boolean   @default(false)
+   bundleItems      BundleItem[]
+   createdAt        DateTime  @default(now())
+   updatedAt        DateTime  @updatedAt
+ }
+ 
+ enum Condition {
+   NEW
+   USED_JDM
+   RECONDITIONED
+   AFTERMARKET
+ }
+ 
+ model Image {
+   id        String @id @default(cuid())
+   url       String
+   alt       String?
+   product   Product @relation(fields: [productId], references: [id])
+   productId String
+ }
+ 
+ // Join table for bundle items (engine packages, gearbox kits)
+ model BundleItem {
+   id          String   @id @default(cuid())
+   bundle      Product  @relation(fields: [bundleId], references: [id])
+   bundleId    String
+   item        Product  @relation(fields: [itemId], references: [id])
+   itemId      String
+   quantity    Int      @default(1)
+ }
+ 
+ // ──────────────────────────────────────
+ // Orders & payments
+ // ──────────────────────────────────────
+ model Order {
+   id                String   @id @default(cuid())
+   userId            String?
+   user              User?    @relation(fields: [userId], references: [id])
+   status            OrderStatus @default(PENDING)
+   totalAmount       Decimal   @db.Decimal(10,2)
+   depositAmount     Decimal   @db.Decimal(10,2)
+   balanceAmount     Decimal   @db.Decimal(10,2)
+   createdAt         DateTime @default(now())
+   updatedAt         DateTime @updatedAt
+   items             OrderItem[]
+   stripeDepositId   String?
+   stripeBalanceId   String?
+ }
+ 
+ enum OrderStatus {
+   PENDING          // created but not paid
+   DEPOSIT_PAID
+   PROCESSING
+   READY_FOR_DISPATCH
+   BALANCE_PAID
+   COMPLETED
+   CANCELLED
+   REFUNDED
+ }
+ 
+ model OrderItem {
+   id          String   @id @default(cuid())
+   order       Order    @relation(fields: [orderId], references: [id])
+   orderId     String
+   product     Product  @relation(fields: [productId], references: [id])
+   productId   String
+   quantity    Int      @default(1)
+   unitPrice   Decimal  @db.Decimal(10,2)
+   totalPrice  Decimal  @db.Decimal(10,2)
+ }
+ 
+ // ──────────────────────────────────────
+ // Site settings (deposit %, VAT, etc.)
+ // ──────────────────────────────────────
+ model Setting {
+   key   String @id
+   value String
+ }
