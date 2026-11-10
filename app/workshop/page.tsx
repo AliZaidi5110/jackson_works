@@ -8,6 +8,7 @@ import {
   GitBranch, Layers, Settings, Wrench, Zap,
 } from 'lucide-react';
 import { ENGINES, PRIORITY_ENGINES, getEngineByCode } from '@/lib/jdm-catalog';
+import { PERFORMANCE_PART_GROUPS, PERFORMANCE_PARTS } from '@/lib/performance-parts';
 
 const SERVICE_GROUPS = [
   {
@@ -72,9 +73,51 @@ const SERVICE_GROUPS = [
       {
         id: 'custom-fabrication',
         icon: Layers,
-        title: 'Custom Manifolds, Exhausts & Fabrication',
-        description: 'Discuss bespoke parts when an off-the-shelf system does not suit the build.',
-        topics: ['Manifold, flange and wastegate clearance', 'Downpipes and exhaust systems', 'Charge pipes, mounts and brackets'],
+        title: 'Custom Work and Fabrication',
+        description: 'Discuss bespoke work when an off-the-shelf part does not suit your build.',
+        topics: ['Charge pipes, mounts and brackets', 'Stainless steel, Inconel, aluminium or titanium requirements'],
+      },
+      {
+        id: 'custom-exhaust-manifolds',
+        icon: Wrench,
+        title: 'Custom Exhaust Manifolds',
+        description: 'Ask about a manifold built around your cylinder head, engine bay and intended use.',
+        topics: ['Turbo, naturally aspirated and supercharged applications', 'Flanges, collectors and wastegate clearance'],
+      },
+      {
+        id: 'under-car-exhausts',
+        icon: Layers,
+        title: 'Under-Car Exhaust Systems',
+        description: 'Scope a bespoke exhaust around the vehicle’s space, noise and flow requirements.',
+        topics: ['Downpipes, mid-sections, X-pipes and backboxes', 'Routing, ground clearance and mounting points'],
+      },
+      {
+        id: 'cad-design',
+        icon: Settings,
+        title: 'CAD Design',
+        description: 'Bring drawings, dimensions or an existing part to discuss a custom design.',
+        topics: ['Flanges, brackets and prototypes', 'Mounting geometry and fitment requirements'],
+      },
+      {
+        id: 'component-manufacturing',
+        icon: Layers,
+        title: 'Component Manufacturing',
+        description: 'Enquire about a one-off component and the material, finish and tolerances it needs.',
+        topics: ['Automotive and other fabrication enquiries', 'Drawings, samples and material specifications'],
+      },
+      {
+        id: 'small-batch-production',
+        icon: Settings,
+        title: 'Small Batch Production',
+        description: 'Discuss repeat production of a part, including quantity, drawings and delivery requirements.',
+        topics: ['Prototype and sample requirements', 'Repeat runs and finishing options'],
+      },
+      {
+        id: 'fitment-check',
+        icon: Car,
+        title: 'Find My Car',
+        description: 'Request a fitment check before choosing a manifold, turbo or wastegate.',
+        topics: ['Engine variant and vehicle chassis', 'Turbo brand, model, inlet flange and wastegate'],
       },
     ],
   },
@@ -114,13 +157,27 @@ const SERVICE_GROUPS = [
   },
 ];
 
+const fabricationServices = SERVICE_GROUPS.find(group => group.id === 'fabrication-services').services;
+const fitmentParts = PERFORMANCE_PART_GROUPS
+  .filter(group => ['manifolds', 'turbo-and-boost', 'fabrication-components'].includes(group.id))
+  .flatMap(group => group.items);
+const fitmentFields = [
+  { name: 'turboBrand', label: 'Turbo brand' },
+  { name: 'turboModel', label: 'Turbo model' },
+  { name: 'turboFlange', label: 'Turbo inlet flange', placeholder: 'e.g. T3, T4 twin-scroll, V-band' },
+  { name: 'wastegate', label: 'Wastegate', placeholder: 'e.g. internal or external, size if known' },
+];
+
 const fieldClass = 'w-full rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-950 placeholder-zinc-500 focus:border-red-600';
 const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-600';
 
 function WorkshopContent() {
   const params = useSearchParams();
-  const initialEngine = getEngineByCode((params.get('engine') ?? '').toUpperCase())?.code ?? '';
-  const initialService = SERVICE_GROUPS.flatMap(group => group.services).find(item => item.id === params.get('service'))?.title ?? '';
+  const engineCode = (params.get('engine') ?? '').toUpperCase();
+  const initialEngine = engineCode === 'RB25DET NEO' ? engineCode : getEngineByCode(engineCode)?.code ?? '';
+  const initialService = PERFORMANCE_PARTS.find(item => item.id === params.get('part'))?.title
+    ?? SERVICE_GROUPS.flatMap(group => group.services).find(item => item.id === params.get('service'))?.title
+    ?? '';
   return <Workshop key={`${initialEngine}:${initialService}`} initialEngine={initialEngine} initialService={initialService} />;
 }
 
@@ -137,6 +194,8 @@ function Workshop({ initialEngine, initialService }: { initialEngine: string; in
   const [service, setService] = useState(initialService);
   const [sending, setSending] = useState(false);
   const [formMessage, setFormMessage] = useState('');
+  const showFitmentFields = fabricationServices.some(item => item.title === service)
+    || fitmentParts.some(item => item.title === service);
 
   async function submitQuote(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -177,6 +236,9 @@ function Workshop({ initialEngine, initialService }: { initialEngine: string; in
           <a href="#quote" className="button-bright mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-colors">
             Request a quote <ArrowRight className="h-4 w-4" />
           </a>
+          <Link href="/performance-parts" className="ml-4 mt-4 inline-flex items-center gap-2 text-sm font-bold text-cyan-200 hover:underline">
+            Browse performance parts <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
@@ -281,9 +343,25 @@ function Workshop({ initialEngine, initialService }: { initialEngine: string; in
                     {group.services.map(item => <option key={item.id} value={item.title}>{item.title}</option>)}
                   </optgroup>
                 ))}
+                {PERFORMANCE_PART_GROUPS.map(group => (
+                  <optgroup key={group.id} label={`Parts · ${group.title}`}>
+                    {group.items.map(item => <option key={item.id} value={item.title}>{item.title}</option>)}
+                  </optgroup>
+                ))}
                 <option value="Other / Not Sure">Other / Not Sure</option>
               </select>
             </label>
+            {showFitmentFields && (
+              <fieldset className="grid gap-4 rounded-xl border border-zinc-200 p-4 sm:grid-cols-2">
+                <legend className="px-1 text-sm font-bold text-zinc-700">Turbo fitment details (optional)</legend>
+                {fitmentFields.map(({ name, label, placeholder }) => (
+                  <label key={name}>
+                    <span className={labelClass}>{label}</span>
+                    <input type="text" name={name} maxLength={160} placeholder={placeholder} className={fieldClass} />
+                  </label>
+                ))}
+              </fieldset>
+            )}
             <label className="block">
               <span className={labelClass}>Details *</span>
               <textarea name="message" required rows={4} maxLength={5000} placeholder="Tell us about the parts or work you need, any existing modifications and how you use the car." className={fieldClass} />

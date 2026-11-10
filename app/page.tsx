@@ -314,9 +314,14 @@ export default function HomePage() {
       <section aria-labelledby="shop-categories" className="mx-auto max-w-7xl px-4 pb-8 pt-9 sm:px-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 id="shop-categories" className="text-zinc-950">Shop by Category</h2>
-          <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-bold text-red-700 hover:underline">
-            Browse all parts <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-bold text-red-700">
+            <Link href="/performance-parts" className="inline-flex items-center gap-2 hover:underline">
+              Performance parts &amp; fitment <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/shop" className="inline-flex items-center gap-2 hover:underline">
+              Browse all parts <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {SHOP_CATEGORIES.map(({ id, name, icon: Icon, color }) => (

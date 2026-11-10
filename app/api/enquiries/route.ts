@@ -11,6 +11,10 @@ type Enquiry = {
   engine?: string;
   service?: string;
   registration?: string;
+  turboBrand?: string;
+  turboModel?: string;
+  turboFlange?: string;
+  wastegate?: string;
   message?: string;
   website?: string;
 };
@@ -49,6 +53,12 @@ export async function POST(request: Request) {
     `Vehicle: ${enquiry.vehicle || 'Not provided'}`,
     `Engine: ${enquiry.engine || 'Not provided'}`,
     `Registration: ${enquiry.registration || 'Not provided'}`,
+    ...[
+      ['Turbo brand', enquiry.turboBrand],
+      ['Turbo model', enquiry.turboModel],
+      ['Turbo inlet flange', enquiry.turboFlange],
+      ['Wastegate', enquiry.wastegate],
+    ].flatMap(([label, value]) => typeof value === 'string' && value.trim() ? [`${label}: ${value.trim().slice(0, 160)}`] : []),
     '',
     message,
   ].join('\n');

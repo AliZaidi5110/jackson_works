@@ -176,6 +176,9 @@ export default function Header() {
             <Link href="/shop" onMouseEnter={() => setActiveMega(null)} className="rounded-lg px-3.5 py-2 text-sm font-bold text-zinc-950 hover:bg-zinc-200">
               All Parts
             </Link>
+            <Link href="/performance-parts" onMouseEnter={() => setActiveMega(null)} className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950">
+              <Gauge className="h-3.5 w-3.5 text-red-700" /> Performance Parts
+            </Link>
 
             {/* Shop by Make */}
             <div className="relative group">
@@ -363,6 +366,7 @@ export default function Header() {
 
             {[
               { href: '/shop', label: 'All Parts' },
+              { href: '/performance-parts', label: 'Performance Parts' },
               { href: '/#engine-packages', label: 'Engine Packages', accent: true },
               { href: '/shop?category=tcu-transmission', label: 'TCU / Transmission' },
               { href: '/shop?category=gearbox-kits', label: 'Gearbox Kits' },
